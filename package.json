@@ -5,11 +5,15 @@
   "repository": "prichodko/esproto",
   "type": "module",
   "types": "./dist/index.d.ts",
+  "module": "./dist/index.es.js",
   "exports": {
-    "runtime": "./dist/runtime"
+    ".": {
+      "module": "./dist/index.es.js",
+      "default": "./dist/index.es.js"
+    }
   },
   "scripts": {
-    "build": "echo TODO",
+    "build": "vite build",
     "test": "vitest"
   },
   "dependencies": {
