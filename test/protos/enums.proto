@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+enum Type {
+  ONE = 0;
+  TWO = 1;
+}
+
+message Test {
+  enum Nested {
+    NESTED_ONE = 0;
+    NESTED_TWO = 1;
+  }
+
+  Type type  = 0;
+  Nested nested = 1;
+}
