@@ -2,6 +2,11 @@
   // This is an alias to @tsconfig/node16: https://github.com/tsconfig/bases
   "extends": "@tsconfig/node16-strictest-esm/tsconfig.json",
   "include": ["src"],
+  "compilerOptions": {
+    "lib": ["es2021", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  },
   // Most ts-node options can be specified here using their programmatic names.
   "ts-node": {
     "esm": true,
@@ -14,9 +19,5 @@
       // but *only* in ts-node.  Useful if you want ts-node and tsc to use
       // different options with a single tsconfig.json.
     }
-  },
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "esModuleInterop": true
   }
 }
