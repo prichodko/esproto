@@ -1,17 +1,25 @@
 import { createWriter, Writer } from './writer'
 import type { Message, EncodeFields } from './types'
+import { uint32 } from './runtime'
 
 // todo: strict flag to throw errors for non-existant types or invariant
 export function encode<M extends Message>(fields: EncodeFields<M>) {
-  return (message: Partial<M>, _writer?: Writer): Uint8Array => {
-    const writer = _writer ?? createWriter()
+  return (message: Partial<M>, writer?: Writer) => {
+    const _writer = createWriter()
 
     for (const [key, value] of Object.entries(message)) {
       const field = fields[key as keyof M]
-      writer.tag(field.tag, field.encode.wireType)
-      field.encode(value, writer)
+      _writer.tag(field.tag, field.encode.wireType)
+      field.encode(value, _writer)
     }
 
-    return writer.finish()
+    // only encode which created the writer should finish it
+    if (writer) {
+      uint32.encode(_writer.buffer.length, writer)
+      writer.buffer.push(..._writer.buffer)
+      return
+    }
+
+    return _writer.finish()
   }
 }

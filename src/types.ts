@@ -37,7 +37,7 @@ export type Codec = {
 export type EncodeFields<M> = {
   [key in keyof M]: {
     tag: number
-    type: Encoding
+    type: Encoding | keyof M
     encode: EncodeFunction
   }
 }

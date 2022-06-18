@@ -117,7 +117,7 @@ const compile = (proto: string) => {
 
         encodeFields[name] = {
           tag,
-          type: 'uint32',
+          type,
           encode: codec?.encode,
         }
 
@@ -127,8 +127,12 @@ const compile = (proto: string) => {
         }
       }
 
+      // TODO: improve setting of wire type
+      const encodeMessage = encode(encodeFields)
+      encodeMessage.wireType = 2
+
       types[name] = {
-        encode: encode(encodeFields),
+        encode: encodeMessage,
         decode: decode(decodeFields),
       }
     }
