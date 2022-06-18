@@ -6,8 +6,6 @@ export function encode(value: number, writer: Writer): void {
   return writeVarint32(value, writer)
 }
 
-encode.wireType = 0
-
 export function decode(reader: Reader): number {
   return readVarint32(reader)
 }

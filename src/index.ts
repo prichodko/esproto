@@ -48,7 +48,7 @@ import type { Reader } from './reader'
 //   uint64: 'Long',
 // }
 
-const codecs: Record<Encoding, Codec> = {
+const codecs: Record<string, Codec> = {
   string,
   bool,
   uint32,

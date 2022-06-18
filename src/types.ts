@@ -24,7 +24,7 @@ export type Message = {
 
 export type EncodeFunction = {
   (value: any, writer?: Writer): void
-  wireType: WireType
+  wireType?: WireType
 }
 
 export type DecodeFunction = (reader: Reader | Uint8Array) => any

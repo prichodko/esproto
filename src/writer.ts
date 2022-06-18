@@ -25,7 +25,7 @@ export const createWriter = (): Writer => {
     buffer: [],
     position: 0,
     textEncoder: new TextEncoder(),
-    tag(field: number, wireType: WireType) {
+    tag(field: number, wireType: WireType = 0) {
       uint32.encode((field << 3) | wireType, this)
     },
     finish() {
