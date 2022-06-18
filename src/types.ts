@@ -1,5 +1,5 @@
 import type { Reader } from './reader'
-import type { Writer } from './writer'
+import type { WireType, Writer } from './writer'
 
 export type Encoding =
   | 'bytes'
@@ -18,7 +18,33 @@ export type Encoding =
   | 'sfixed32'
   | 'sfixed64'
 
-export type Codec<T = any> = {
-  encode: (writer: Writer, value: T) => void
-  decode: (reader: Reader) => T
+export type Message = {
+  [key in string]: any
+}
+
+export type EncodeFunction = {
+  (value: any, writer?: Writer): void
+  wireType: WireType
+}
+
+export type DecodeFunction = (reader: Reader | Uint8Array) => any
+
+export type Codec = {
+  encode: EncodeFunction
+  decode: DecodeFunction
+}
+
+export type EncodeFields<M> = {
+  [key in keyof M]: {
+    tag: number
+    type: Encoding
+    encode: EncodeFunction
+  }
+}
+
+export type DecodeFields<M> = {
+  [key in number]: {
+    name: keyof M
+    decode: DecodeFunction
+  }
 }

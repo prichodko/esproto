@@ -1,4 +1,3 @@
-import { TextDecoder } from 'util'
 import { uint32 } from './runtime'
 
 export interface Reader {
@@ -12,15 +11,11 @@ export interface Reader {
 }
 
 export const createReader = (buffer: Uint8Array): Reader => {
-  const textDecoder = new TextDecoder()
-  const position = 0
-  const limit = buffer.length
-
   return {
     buffer,
-    position,
-    limit,
-    textDecoder,
+    position: 0,
+    limit: buffer.length,
+    textDecoder: new TextDecoder(),
     tag() {
       return uint32.decode(this) >>> 3
     },

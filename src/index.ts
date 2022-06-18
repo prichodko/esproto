@@ -1,19 +1,13 @@
-import fs from 'fs'
-import path from 'path'
-
 import { parse } from 'protocol-buffers-schema'
-import { genInterface, genObjectFromRawEntries } from 'knitwork'
 import type { Enum, Message } from 'protocol-buffers-schema/types'
-import * as uint32 from './codecs/uint32'
-import * as bool from './codecs/bool'
-import * as string from './codecs/string'
-import { createReader } from './reader'
-import { createWriter } from './writer'
-import type { Codec, Encoding } from './types'
-import { decode } from './decode'
-import { encode } from './runtime'
 
-type enco = typeof import('./codecs/bool')
+import { bool, string, uint32 } from './runtime'
+
+import { decode } from './decode'
+import { encode } from './encode'
+
+import type { Codec, DecodeFields, EncodeFields, Encoding } from './types'
+import type { Reader } from './reader'
 
 // types.defaults = bake([
 //   /* double   */ 0,
@@ -34,30 +28,31 @@ type enco = typeof import('./codecs/bool')
 //   /* message  */ null
 // ]);
 
-const types: { [type: string]: string } = {
-  string: 'string',
-  bool: 'boolean',
-  bytes: 'Uint8Array',
+// const types: { [type: string]: string } = {
+//   string: 'string',
+//   bool: 'boolean',
+//   bytes: 'Uint8Array',
 
-  double: 'number',
-  fixed32: 'number',
-  float: 'number',
-  int32: 'number',
-  sfixed32: 'number',
-  sint32: 'number',
-  uint32: 'number',
+//   double: 'number',
+//   fixed32: 'number',
+//   float: 'number',
+//   int32: 'number',
+//   sfixed32: 'number',
+//   sint32: 'number',
+//   uint32: 'number',
 
-  fixed64: 'Long',
-  int64: 'Long',
-  sfixed64: 'Long',
-  sint64: 'Long',
-  uint64: 'Long',
-}
+//   fixed64: 'Long',
+//   int64: 'Long',
+//   sfixed64: 'Long',
+//   sint64: 'Long',
+//   uint64: 'Long',
+// }
 
 const codecs: Record<Encoding, Codec> = {
   string,
   bool,
   uint32,
+  // enums,
   // bytes: 'Uint8Array',
 
   // double: 'number',
@@ -74,29 +69,13 @@ const codecs: Record<Encoding, Codec> = {
   // uint64: 'Long',
 }
 
-type Encode = {
-  [name: string]: {
-    tag: number
-    type: Encoding | string
-    encode: Codec['encode']
-  }
-}
-
-type Decode = {
-  [tag: string]: {
-    name: string
-    type: Encoding | string
-    decode: Codec['decode']
-  }
-}
-
 const compile = (proto: string) => {
   const schema = parse(proto)
 
   const types: Record<string, Codec> = {}
 
   const enums: { [key in string]: { [key in string]: number } } = {}
-  const messages = {}
+  // const messages: { [key in string]: any } = {}
 
   function compileEnums(_enums: Enum[]) {
     for (const enumeration of Object.values(_enums)) {
@@ -111,38 +90,46 @@ const compile = (proto: string) => {
       )
 
       types[name] = {
-        decode(reader) {},
-        encode(writer, value) {},
+        encode(value: number, writer) {
+          uint32.encode(value, writer)
+        },
+        decode(reader: Reader) {
+          return uint32.decode(reader)
+        },
       }
     }
   }
 
   function compileMessages(messages: Message[]) {
     for (const message of Object.values(messages)) {
-      const encodeFields: Encode = {}
-      const decodeFields: Decode = {}
+      const encodeFields: EncodeFields<any> = {}
+      const decodeFields: DecodeFields<any> = {}
 
-      for (const message of Object.values(schema.messages)) {
-        const { name } = message
+      const { name } = message
 
-        compileEnums(message.enums)
-        compileMessages(message.messages)
+      compileEnums(message.enums)
+      compileMessages(message.messages)
 
-        for (const field of Object.values(message.fields)) {
-          const { name, tag, type } = field
+      for (const field of Object.values(message.fields)) {
+        const { name, tag, type } = field
 
-          encodeFields[name] = {
-            tag,
-            type,
-            encode: codecs[type as Encoding].encode,
-          }
+        const codec = (types[type] ?? codecs[type]) as Codec
 
-          decodeFields[tag] = {
-            type,
-            name,
-            decode: codecs[type as Encoding].decode,
-          }
+        encodeFields[name] = {
+          tag,
+          type: 'uint32',
+          encode: codec?.encode,
         }
+
+        decodeFields[tag] = {
+          name,
+          decode: codec?.decode,
+        }
+      }
+
+      types[name] = {
+        encode: encode(encodeFields),
+        decode: decode(decodeFields),
       }
     }
   }
@@ -151,16 +138,8 @@ const compile = (proto: string) => {
   compileMessages(schema.messages)
 
   // TODO: fs.writeFileSync('generated.ts', genInterface(name, contents), 'utf8')
-
-  return {
-    encode<T>(data: T): Uint8Array {
-      return encode(data, encodeFields)
-    },
-
-    decode<T extends {}>(buffer: Uint8Array): T {
-      return decode(buffer, decodeFields)
-    },
-  }
+  const testMessage = types['Test']
+  return testMessage!
 }
 
 export { compile }
