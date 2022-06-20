@@ -4,6 +4,9 @@
   "license": "MIT",
   "repository": "prichodko/esproto",
   "type": "module",
+  "bin": {
+    "esproto": "./dist/cli.js"
+  },
   "types": "./dist/index.d.ts",
   "module": "./dist/index.es.js",
   "exports": {
@@ -14,10 +17,13 @@
   },
   "scripts": {
     "build": "vite build",
-    "test": "vitest"
+    "test": "vitest",
+    "bench": "yarn bench:speed && yarn bench:size",
+    "bench:speed": "echo TODO",
+    "bench:size": "echo TODO"
   },
   "dependencies": {
-    "knitwork": "^0.1.2",
+    "globby": "^13.1.2",
     "protocol-buffers-schema": "^3.6.0",
     "sade": "^1.8.1"
   },

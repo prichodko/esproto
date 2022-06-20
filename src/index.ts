@@ -69,7 +69,9 @@ const codecs: Record<string, Codec> = {
   // uint64: 'Long',
 }
 
-const compile = (proto: string) => {
+interface Options {}
+
+const compile = (proto: string, opts: Options) => {
   const schema = parse(proto)
 
   const types: Record<string, Codec> = {}
