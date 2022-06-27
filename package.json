@@ -16,9 +16,10 @@
     }
   },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "vite build",
     "test": "vitest",
-    "bench": "yarn bench:speed && yarn bench:size",
+    "bench": "pnpm bench:speed && pnpm bench:size",
     "bench:speed": "echo TODO",
     "bench:size": "echo TODO"
   },
